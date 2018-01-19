@@ -171,7 +171,8 @@ def load_monitors(m, filename, quiet):
             continue
 
         if not quiet:
-            print "Adding %s monitor %s" % (type, monitor)
+            print ("Adding %s monitor %s") % (type, monitor)
+
         m.add_monitor(monitor, new_monitor)
 
     for i in m.monitors.keys():
@@ -207,10 +208,10 @@ def load_loggers(m, config, quiet):
             sys.stderr.write("Unknown logger type %s\n" % type)
             continue
         if l is None:
-            print "Creating logger %s failed!" % logger
+            print ("Creating logger %s failed!") % logger
             continue
         if not quiet:
-            print "Adding %s logger %s" % (type, logger)
+            print ("Adding %s logger %s" % (type, logger))
         m.add_logger(logger, l)
         del(l)
     return m
@@ -246,7 +247,7 @@ def load_alerters(m, config, quiet):
             sys.stderr.write("Unknown alerter type %s\n" % type)
             continue
         if not quiet:
-            print "Adding %s alerter %s" % (type, alerter)
+            print ("Adding %s alerter %s") % (type, alerter)
         a.name = alerter
         m.add_alerter(alerter, a)
         del(a)
@@ -278,25 +279,25 @@ def main():
         options.verbose = True
 
     if not options.quiet:
-        print "SimpleMonitor v%s" % VERSION
-        print "--> Loading main config from %s" % options.config
+        print ("SimpleMonitor v%s" % VERSION)
+        print ("--> Loading main config from %s" % options.config)
 
     config = EnvironmentAwareConfigParser()
     if not os.path.exists(options.config):
-        print '--> Configuration file "%s" does not exist!' % options.config
+        print ('--> Configuration file "%s" does not exist!' % options.config)
         sys.exit(1)
     try:
         config.read(options.config)
     except Exception as e:
-        print '--> Unable to read configuration file "%s"' % options.config
-        print 'The config parser reported:'
-        print e
+        print ('--> Unable to read configuration file "%s"' % options.config)
+        print ('The config parser reported:')
+        print (e)
         sys.exit(1)
 
     try:
         interval = config.getint("monitor", "interval")
     except NoOptionError:
-        print '--> Missing [monitor] section from config file, or missing the "interval" setting in it'
+        print ('--> Missing [monitor] section from config file, or missing the "interval" setting in it')
         sys.exit(1)
 
     pidfile = ""
@@ -322,7 +323,7 @@ def main():
         monitors_file = "monitors.ini"
 
     if not options.quiet:
-        print "--> Loading monitor config from %s" % monitors_file
+        print ("--> Loading monitor config from %s" % monitors_file)
 
     m = SimpleMonitor()
 
@@ -334,7 +335,7 @@ def main():
         sys.exit(2)
 
     if not options.quiet:
-        print "--> Loaded %d monitors.\n" % count
+        print ("--> Loaded %d monitors.\n" % count)
 
     m = load_loggers(m, config, options.quiet)
     m = load_alerters(m, config, options.quiet)
@@ -355,7 +356,7 @@ def main():
         sys.exit(1)
 
     if options.test:
-        print "--> Config test complete. Exiting."
+        print ("--> Config test complete. Exiting.")
         sys.exit(0)
 
     if not options.quiet:
@@ -368,13 +369,13 @@ def main():
 
     if enable_remote:
         if not options.quiet:
-            print "--> Starting remote listener thread"
+            print ("--> Starting remote listener thread")
         remote_listening_thread = Loggers.network.Listener(m, remote_port, options.verbose, key)
         remote_listening_thread.daemon = True
         remote_listening_thread.start()
 
     if not options.quiet:
-        print "--> Starting... (loop runs every %ds) Hit ^C to stop" % interval
+        print ("--> Starting... (loop runs every %ds) Hit ^C to stop" % interval)
     loop = True
     heartbeat = 0
 
@@ -396,20 +397,20 @@ def main():
         except KeyboardInterrupt:
 
             if not options.quiet:
-                print "\n--> EJECT EJECT"
+                print ("\n--> EJECT EJECT")
             loop = False
-        except Exception, e:
+        except e:
             sys.exc_info()
             sys.stderr.write("Caught unhandled exception during main loop: %s\n" % e)
         if loop and enable_remote:
             if not remote_listening_thread.isAlive():
-                print "Listener thread died :("
+                print ("Listener thread died :(")
                 remote_listening_thread = Loggers.network.Listener(m, remote_port, options.verbose)
                 remote_listening_thread.start()
         try:
             time.sleep(interval)
         except:
-            print "\n--> Quitting."
+            print ("\n--> Quitting.")
             loop = False
 
     if enable_remote:
@@ -420,10 +421,10 @@ def main():
         try:
             unlink(pidfile)
         except:
-            print "Couldn't remove pidfile!"
+            print ("Couldn't remove pidfile!")
 
     if not options.quiet:
-        print "--> Finished."
+        print ("--> Finished.")
 
 if __name__ == "__main__":
     main()
